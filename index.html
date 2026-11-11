@@ -350,6 +350,8 @@ if (nameInput.value) {
 
 let currentFeed = null;
 let seances = [];
+let currentRef = null;
+let seancesRef = null;
 let lastStart = null;
 let lastStartKnown = false;
 let selectedSide = localStorage.getItem("side") || "G";
@@ -578,8 +580,8 @@ if (configOk) {
   firebase.initializeApp(FIREBASE_CONFIG);
   const db = firebase.database();
   const base = db.ref("familles/" + familyKey());
-  const currentRef = base.child("current");
-  const seancesRef = base.child("seances");
+  currentRef = base.child("current");
+  seancesRef = base.child("seances");
 
   db.ref(".info/serverTimeOffset").on("value", s => { serverOffset = s.val() || 0; });
   db.ref(".info/connected").on("value", s => {
