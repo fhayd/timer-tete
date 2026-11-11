@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1e1b2e">
+<meta name="theme-color" content="#fdf6f1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tétés">
@@ -13,17 +13,17 @@
 <title>Suivi des tétés</title>
 <style>
   :root {
-    --bg: #1e1b2e;
-    --card: #2a2640;
-    --card2: #332e4f;
-    --text: #f2f0fa;
-    --muted: #a49fc0;
-    --accent: #f4a3c0;
-    --accent2: #8fd3c7;
-    --ok: #7ed6a5;
-    --warn: #f5c66b;
-    --late: #f27d7d;
-    --danger: #e06c6c;
+    --bg: #fdf6f1;
+    --card: #ffffff;
+    --card2: #fbeadd;
+    --text: #55495e;
+    --muted: #9c8fa0;
+    --accent: #f7b79c;
+    --accent2: #a9d8b8;
+    --ok: #6fae87;
+    --warn: #e0a355;
+    --late: #e07f7f;
+    --danger: #d97777;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
@@ -66,6 +66,7 @@
     border-radius: 20px;
     padding: 24px 20px;
     text-align: center;
+    box-shadow: 0 4px 18px rgba(120, 90, 80, 0.08);
   }
   #statusLabel {
     color: var(--muted);
@@ -92,9 +93,9 @@
   #sinceInfo .side { color: var(--accent2); font-weight: 600; }
   #alertBanner {
     margin-top: 14px;
-    background: rgba(242, 125, 125, 0.15);
-    border: 1px solid rgba(242, 125, 125, 0.4);
-    color: var(--late);
+    background: rgba(224, 127, 127, 0.12);
+    border: 1px solid rgba(224, 127, 127, 0.35);
+    color: #c96a6a;
     border-radius: 12px;
     padding: 10px 14px;
     font-weight: 600;
@@ -121,7 +122,7 @@
   }
   .side-toggle button.active {
     background: var(--card2);
-    color: var(--accent2);
+    color: #4e8a66;
   }
   .side-toggle:disabled { opacity: 0.4; pointer-events: none; }
   #mainBtn {
@@ -129,16 +130,18 @@
     border: none;
     border-radius: 16px;
     background: var(--accent);
-    color: #2b1a24;
+    color: #6b3d2c;
     font-size: 1.15rem;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.1s, filter 0.15s;
+    box-shadow: 0 4px 14px rgba(247, 183, 156, 0.45);
   }
   #mainBtn:active { transform: scale(0.98); }
   #mainBtn.stop {
     background: var(--accent2);
-    color: #14332d;
+    color: #2f5a44;
+    box-shadow: 0 4px 14px rgba(169, 216, 184, 0.45);
   }
   #mainBtn:disabled { opacity: 0.5; cursor: wait; }
   h2 {
@@ -162,9 +165,10 @@
     justify-content: space-between;
     gap: 10px;
     font-size: 0.95rem;
+    box-shadow: 0 2px 10px rgba(120, 90, 80, 0.06);
   }
   #history .when { color: var(--muted); font-size: 0.85rem; }
-  #history .detail b { color: var(--accent2); }
+  #history .detail b { color: #4e8a66; }
   #history .del {
     background: none;
     border: none;
@@ -228,15 +232,15 @@
     padding: 2px 6px;
     border-radius: 6px;
     font-size: 0.85em;
-    color: var(--accent2);
+    color: #4e8a66;
   }
   .overlay pre {
-    background: #16131f;
+    background: #f6ede7;
     border-radius: 10px;
     padding: 12px;
     font-size: 0.78rem;
     overflow-x: auto;
-    color: #cdd6f4;
+    color: #6b5a68;
     margin-top: 6px;
   }
 </style>
