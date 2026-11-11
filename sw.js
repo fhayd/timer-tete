@@ -12,3 +12,15 @@ self.addEventListener("notificationclick", e => {
     })
   );
 });
+
+self.addEventListener("push", e => {
+  let data = {};
+  try { data = e.data.json(); } catch (_) {}
+  e.waitUntil(
+    self.registration.showNotification(data.title || "🍼 Rappel tété", {
+      body: data.body || "",
+      tag: data.tag || "tete-rappel",
+      renotify: true
+    })
+  );
+});
