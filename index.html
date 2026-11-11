@@ -483,9 +483,9 @@ $("mainBtn").onclick = async () => {
   $("mainBtn").disabled = true;
   try {
     if (currentFeed) {
-      const startedAt = currentFeed.startedAt;
+      const { startedAt, side } = currentFeed;
       await currentRef.remove();
-      await seancesRef.push({ startedAt, endedAt: now(), side: currentFeed.side || null });
+      await seancesRef.push({ startedAt, endedAt: now(), side: side || null });
     } else {
       await currentRef.set({ startedAt: now(), side: selectedSide });
     }
