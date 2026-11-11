@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e1b2e">
+<title>Suivi des tétés</title>
+<style>
+  :root {
+    --bg: #1e1b2e;
+    --card: #2a2640;
+    --card2: #332e4f;
+    --text: #f2f0fa;
+    --muted: #a49fc0;
+    --accent: #f4a3c0;
+    --accent2: #8fd3c7;
+    --ok: #7ed6a5;
+    --warn: #f5c66b;
+    --late: #f27d7d;
+    --danger: #e06c6c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  main {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  header h1 { font-size: 1.25rem; font-weight: 700; }
+  #babyName {
+    background: var(--card);
+    border: 1px solid transparent;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    width: 140px;
+    text-align: right;
+  }
+  #babyName:focus { outline: none; border-color: var(--accent); }
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  #statusLabel {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  #bigTimer {
+    font-size: clamp(2.4rem, 12vw, 3.4rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+  #bigTimer.ok { color: var(--ok); }
+  #bigTimer.warn { color: var(--warn); }
+  #bigTimer.late { color: var(--late); }
+  #sinceInfo {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  #sinceInfo .side { color: var(--accent2); font-weight: 600; }
+  #alertBanner {
+    margin-top: 14px;
+    background: rgba(242, 125, 125, 0.15);
+    border: 1px solid rgba(242, 125, 125, 0.4);
+    color: var(--late);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .hidden { display: none !important; }
+  .actions { display: flex; flex-direction: column; gap: 12px; }
+  .side-toggle {
+    display: flex;
+    background: var(--card);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .side-toggle button {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .side-toggle button.active {
+    background: var(--card2);
+    color: var(--accent2);
+  }
+  .side-toggle:disabled { opacity: 0.4; pointer-events: none; }
+  #mainBtn {
+    padding: 18px;
+    border: none;
+    border-radius: 16px;
+    background: var(--accent);
+    color: #2b1a24;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.15s;
+  }
+  #mainBtn:active { transform: scale(0.98); }
+  #mainBtn.stop {
+    background: var(--accent2);
+    color: #14332d;
+  }
+  #mainBtn:disabled { opacity: 0.5; cursor: wait; }
+  h2 {
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  #history {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #history li {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.95rem;
+  }
+  #history .when { color: var(--muted); font-size: 0.85rem; }
+  #history .detail b { color: var(--accent2); }
+  #history .del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 8px;
+  }
+  #history .del:hover { color: var(--danger); background: rgba(224,108,108,0.12); }
+  #emptyHistory { color: var(--muted); font-size: 0.9rem; text-align: center; padding: 12px; }
+  footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  #notifBtn {
+    background: var(--card);
+    border: 1px solid var(--card2);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  #notifBtn.granted { color: var(--ok); border-color: rgba(126,214,165,0.4); }
+  #syncState .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    background: #888;
+  }
+  #syncState .dot.on { background: var(--ok); }
+  #syncState .dot.off { background: var(--danger); }
+  #errorBanner {
+    background: rgba(242,125,125,0.12);
+    border: 1px solid rgba(242,125,125,0.35);
+    color: var(--late);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 10;
+    padding: 28px 20px;
+    overflow-y: auto;
+  }
+  .overlay .card { text-align: left; margin-bottom: 14px; }
+  .overlay h2 { color: var(--text); font-size: 1.1rem; margin-bottom: 10px; }
+  .overlay ol { margin-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
+  .overlay code {
+    background: var(--card2);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    color: var(--accent2);
+  }
+  .overlay pre {
+    background: #16131f;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.78rem;
+    overflow-x: auto;
+    color: #cdd6f4;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div id="setup" class="overlay hidden">
+  <h1>🍼 Configuration requise</h1>
+  <br>
+  <div class="card">
+    <h2>1. Créer la base de données (gratuit, ~5 min)</h2>
+    <ol>
+      <li>Aller sur <code>console.firebase.google.com</code> et créer un projet.</li>
+      <li>Menu <b>Realtime Database</b> → <b>Créer une base de données</b> → mode test.</li>
+      <li>Dans <b>Paramètres du projet</b>, section « Vos applications », ajouter une application <b>Web</b> et copier l'objet <code>firebaseConfig</code>.</li>
+      <li>Coller cet objet dans le fichier <code>index.html</code>, à la place du bloc <code>FIREBASE_CONFIG</code> en haut du script.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>2. Règles de sécurité</h2>
+    <ol>
+      <li>Dans <b>Realtime Database → Règles</b>, coller :</li>
+    </ol>
+    <pre>{
+  "rules": {
+    "familles": {
+      "$famille": { ".read": true, ".write": true }
+    }
+  }
+}</pre>
+    <ol start="2">
+      <li>Le nom de famille dans l'URL (<code>#famille=...</code>) sert de clé d'accès : choisissez-en une longue et aléatoire, et partagez uniquement l'URL complète entre vous.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>3. Héberger la page</h2>
+    <ol>
+      <li>Mettre <code>index.html</code> et <code>sw.js</code> sur un hébergement statique (GitHub Pages, Netlify, Firebase Hosting…).</li>
+      <li>Ouvrir la même URL complète sur les deux téléphones, puis activer les notifications.</li>
+    </ol>
+  </div>
+</div>
+
+<main>
+  <header>
+    <h1>🍼 Suivi des tétés</h1>
+    <input id="babyName" placeholder="Bébé" maxlength="20">
+  </header>
+
+  <div id="errorBanner" class="hidden"></div>
+
+  <section class="card">
+    <div id="statusLabel">Dernière tété</div>
+    <div id="bigTimer">—</div>
+    <div id="sinceInfo">Aucune tété enregistrée</div>
+    <div id="alertBanner" class="hidden"></div>
+  </section>
+
+  <section class="actions">
+    <div class="side-toggle" id="sideToggle">
+      <button data-side="G" class="active">← Gauche</button>
+      <button data-side="D">Droite →</button>
+    </div>
+    <button id="mainBtn" disabled>Chargement…</button>
+  </section>
+
+  <section>
+    <h2>Historique</h2>
+    <ul id="history"></ul>
+    <div id="emptyHistory" class="hidden">Aucune tété pour le moment</div>
+  </section>
+
+  <footer>
+    <button id="notifBtn">🔔 Activer les notifications</button>
+    <span id="muteBtn" style="cursor:pointer;" title="Son de rappel">🔊</span>
+    <span id="syncState"><span class="dot"></span><span id="syncLabel">Connexion…</span></span>
+  </footer>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "COLLEZ_ICI_VOTRE_CONFIG_FIREBASE",
+  authDomain: "COLLEZ_ICI",
+  databaseURL: "COLLEZ_ICI",
+  projectId: "COLLEZ_ICI",
+  storageBucket: "COLLEZ_ICI",
+  messagingSenderId: "COLLEZ_ICI",
+  appId: "COLLEZ_ICI"
+};
+
+const REMIND_AFTER_MS = 3 * 60 * 60 * 1000;
+const REPEAT_MS = 15 * 60 * 1000;
+const WARN_AFTER_MS = 2 * 60 * 60 * 1000;
+
+function familyKey() {
+  const m = location.hash.match(/famille=([\w-]+)/);
+  return m ? m[1] : "notre-bebe";
+}
+
+const configOk = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith("COLLEZ_ICI");
+if (!configOk) {
+  document.getElementById("setup").classList.remove("hidden");
+}
+
+const $ = id => document.getElementById(id);
+const nameInput = $("babyName");
+nameInput.value = localStorage.getItem("babyName") || "";
+nameInput.addEventListener("input", () => localStorage.setItem("babyName", nameInput.value));
+if (nameInput.value) {
+  document.querySelector("h1").textContent = "🍼 " + nameInput.value;
+  nameInput.addEventListener("input", () => {
+    document.querySelector("h1").textContent = nameInput.value ? "🍼 " + nameInput.value : "🍼 Suivi des tétés";
+  });
+}
+
+let currentFeed = null;
+let seances = [];
+let lastStart = null;
+let lastStartKnown = false;
+let selectedSide = localStorage.getItem("side") || "G";
+let serverOffset = 0;
+let connected = false;
+const now = () => Date.now() + serverOffset;
+
+function fmtDuration(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  if (h > 0) return h + " h " + String(m).padStart(2, "0") + " min";
+  if (m > 0) return m + " min " + String(s).padStart(2, "0") + " s";
+  return s + " s";
+}
+function fmtClock(ts) {
+  return new Date(ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const today = new Date();
+  const yesterday = new Date(Date.now() - 86400000);
+  const same = (a, b) => a.toDateString() === b.toDateString();
+  if (same(d, today)) return "Aujourd'hui";
+  if (same(d, yesterday)) return "Hier";
+  return d.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function updateLastStart() {
+  let latest = 0;
+  if (currentFeed && currentFeed.startedAt) latest = currentFeed.startedAt;
+  for (const s of seances) if (s.startedAt > latest) latest = s.startedAt;
+  lastStart = latest || null;
+  lastStartKnown = true;
+  render();
+}
+
+function render() {
+  const timer = $("bigTimer");
+  const info = $("sinceInfo");
+  const banner = $("alertBanner");
+  const btn = $("mainBtn");
+  const toggle = $("sideToggle");
+
+  btn.disabled = !connected || !lastStartKnown;
+  toggle.classList.toggle("hidden", !!currentFeed);
+
+  if (currentFeed) {
+    $("statusLabel").textContent = "Tété en cours";
+    timer.className = "";
+    btn.textContent = "Terminer la tété";
+    btn.classList.add("stop");
+  } else {
+    $("statusLabel").textContent = "Dernière tété";
+    btn.textContent = "Démarrer la tété";
+    btn.classList.remove("stop");
+  }
+
+  if (!lastStart) {
+    timer.textContent = "—";
+    timer.className = "";
+    info.textContent = "Aucune tété enregistrée";
+    banner.classList.add("hidden");
+    return;
+  }
+
+  const elapsed = now() - lastStart;
+  timer.textContent = fmtDuration(elapsed);
+  timer.className = elapsed >= REMIND_AFTER_MS ? "late" : elapsed >= WARN_AFTER_MS ? "warn" : "ok";
+
+  let txt = "Débutée à " + fmtClock(lastStart);
+  if (currentFeed) {
+    txt += " · côté <span class='side'>" + (currentFeed.side === "D" ? "droit" : "gauche") + "</span>";
+  }
+  info.innerHTML = txt;
+
+  if (!currentFeed && elapsed >= REMIND_AFTER_MS) {
+    banner.textContent = "⏰ " + fmtDuration(elapsed) + " depuis la dernière tété — pensez au repas !";
+    banner.classList.remove("hidden");
+  } else {
+    banner.classList.add("hidden");
+  }
+}
+
+function renderHistory() {
+  const ul = $("history");
+  const empty = $("emptyHistory");
+  ul.innerHTML = "";
+  if (!seances.length) {
+    empty.classList.remove("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+  let lastDay = null;
+  for (const s of seances) {
+    const day = fmtDate(s.startedAt);
+    const li = document.createElement("li");
+    const dur = s.endedAt ? fmtDuration(s.endedAt - s.startedAt) : "en cours";
+    const dayLabel = day !== lastDay ? day + " · " : "";
+    lastDay = day;
+    li.innerHTML =
+      "<div><div class='detail'>" + dayLabel + "<b>" + fmtClock(s.startedAt) + "</b>" +
+      (s.side ? " · " + (s.side === "D" ? "D" : "G") : "") + "</div>" +
+      "<div class='when'>durée : " + dur + "</div></div>";
+    const del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "✕";
+    del.title = "Supprimer cette tété";
+    del.onclick = () => { if (confirm("Supprimer cette tété ?")) seancesRef.child(s.id).remove(); };
+    li.appendChild(del);
+    ul.appendChild(li);
+  }
+}
+
+document.querySelectorAll("#sideToggle button").forEach(b => {
+  if (b.dataset.side === selectedSide) {
+    document.querySelectorAll("#sideToggle button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+  }
+  b.onclick = () => {
+    selectedSide = b.dataset.side;
+    localStorage.setItem("side", selectedSide);
+    document.querySelectorAll("#sideToggle button").forEach(x => x.classList.toggle("active", x === b));
+  };
+});
+
+$("mainBtn").onclick = async () => {
+  $("mainBtn").disabled = true;
+  try {
+    if (currentFeed) {
+      const startedAt = currentFeed.startedAt;
+      await currentRef.remove();
+      await seancesRef.push({ startedAt, endedAt: now(), side: currentFeed.side || null });
+    } else {
+      await currentRef.set({ startedAt: now(), side: selectedSide });
+    }
+  } catch (e) {
+    showError("Impossible d'enregistrer : " + e.message);
+  }
+  $("mainBtn").disabled = false;
+};
+
+function showError(msg) {
+  const b = $("errorBanner");
+  b.textContent = "⚠️ " + msg;
+  b.classList.remove("hidden");
+  setTimeout(() => b.classList.add("hidden"), 8000);
+}
+
+const beepOn = localStorage.getItem("beep") !== "off";
+$("muteBtn").textContent = beepOn ? "🔊" : "🔇";
+$("muteBtn").onclick = () => {
+  const on = localStorage.getItem("beep") !== "off";
+  localStorage.setItem("beep", on ? "off" : "on");
+  $("muteBtn").textContent = on ? "🔇" : "🔊";
+};
+
+function beep() {
+  if (localStorage.getItem("beep") === "off") return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    o.start(); o.stop(ctx.currentTime + 0.6);
+  } catch (e) {}
+}
+
+async function notify(body) {
+  const title = "🍼 " + (nameInput.value ? nameInput.value : "Rappel tété");
+  try {
+    if ("serviceWorker" in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) {
+        await reg.showNotification(title, { body, tag: "tete-rappel", renotify: true });
+        return;
+      }
+    }
+    new Notification(title, { body, tag: "tete-rappel" });
+  } catch (e) {
+    try { new Notification(title, { body }); } catch (e2) {}
+  }
+}
+
+const notifBtn = $("notifBtn");
+function refreshNotifBtn() {
+  const p = Notification.permission;
+  notifBtn.textContent = p === "granted" ? "🔔 Notifications activées" : p === "denied" ? "🔕 Notifications bloquées" : "🔔 Activer les notifications";
+  notifBtn.classList.toggle("granted", p === "granted");
+}
+if ("Notification" in window) {
+  refreshNotifBtn();
+  notifBtn.onclick = async () => {
+    if (Notification.permission === "default") {
+      await Notification.requestPermission();
+      refreshNotifBtn();
+      if (Notification.permission === "granted") notify("Les rappels de tété sont activés ✅");
+    }
+  };
+} else {
+  notifBtn.textContent = "🔕 Non supporté";
+  notifBtn.disabled = true;
+}
+
+function checkReminder() {
+  if (!lastStart || currentFeed) return;
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const elapsed = now() - lastStart;
+  if (elapsed < REMIND_AFTER_MS) return;
+  const key = "notified_" + lastStart;
+  const last = parseInt(localStorage.getItem(key) || "0", 10);
+  if (!last || now() - last >= REPEAT_MS) {
+    localStorage.setItem(key, String(now()));
+    notify(fmtDuration(elapsed) + " depuis la dernière tété. Pensez au repas !");
+    beep();
+  }
+}
+
+setInterval(() => { render(); checkReminder(); }, 1000);
+
+if (configOk) {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const db = firebase.database();
+  const base = db.ref("familles/" + familyKey());
+  const currentRef = base.child("current");
+  const seancesRef = base.child("seances");
+
+  db.ref(".info/serverTimeOffset").on("value", s => { serverOffset = s.val() || 0; });
+  db.ref(".info/connected").on("value", s => {
+    connected = !!s.val();
+    $("syncLabel").textContent = connected ? "Synchronisé" : "Hors ligne";
+    document.querySelector("#syncState .dot").className = "dot " + (connected ? "on" : "off");
+    render();
+  });
+
+  currentRef.on("value", s => { currentFeed = s.val(); updateLastStart(); }, e => showError("Lecture impossible : " + e.message));
+  seancesRef.limitToLast(40).on("value", s => {
+    const val = s.val() || {};
+    seances = Object.entries(val).map(([id, v]) => ({ id, ...v })).sort((a, b) => b.startedAt - a.startedAt);
+    renderHistory();
+    updateLastStart();
+  }, e => showError("Lecture impossible : " + e.message));
+
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+}
+</script>
+</body>
+</html>
